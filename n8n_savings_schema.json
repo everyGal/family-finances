@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Savings Accounts Schema",
+  "description": "Schema for savings, investment, and cash accounts",
+  "type": "object",
+  "properties": {
+    "savings_accounts": {
+      "type": "array",
+      "description": "All savings and investment accounts",
+      "items": {
+        "type": "object",
+        "required": ["id", "account_name", "account_type", "owner", "accumulated"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the account"
+          },
+          "account_name": {
+            "type": "string",
+            "description": "Account display name in Hebrew",
+            "examples": [
+              "חסכון לכל ילד - רומי (אנליסט)",
+              "קופ\"ג להשקעה רומי (אנליסט)",
+              "קה\"ש גל (מיטב)"
+            ]
+          },
+          "account_type": {
+            "type": "string",
+            "enum": ["monthly", "fixed", "cash"],
+            "description": "Type of account: monthly (חסכונות חודשיים), fixed (קה\"ש), cash (עו\"ש)"
+          },
+          "owner": {
+            "type": "string",
+            "enum": ["הדס", "גל", "shared"],
+            "description": "Account owner"
+          },
+          "monthly_amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Monthly contribution amount (0 for non-monthly accounts)"
+          },
+          "yearly_amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Yearly contribution (calculated as monthly_amount * 12)"
+          },
+          "accumulated": {
+            "type": "number",
+            "description": "Total accumulated amount in the account"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about the account"
+          },
+          "sort_order": {
+            "type": "integer",
+            "description": "Display order in the UI"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "total_monthly_savings": {
+          "type": "number",
+          "description": "Sum of all monthly savings"
+        },
+        "total_accumulated": {
+          "type": "number",
+          "description": "Sum of all accumulated savings"
+        }
+      }
+    }
+  }
+}

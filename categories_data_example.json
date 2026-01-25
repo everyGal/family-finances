@@ -1,0 +1,157 @@
+{
+  "categories": [
+    {
+      "id": "mortgage",
+      "name_hebrew": "משכנתא",
+      "name_english": "Mortgage",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 1,
+      "is_active": true
+    },
+    {
+      "id": "savings_investments",
+      "name_hebrew": "חסכונות/השקעות",
+      "name_english": "Savings/Investments",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 2,
+      "is_active": true
+    },
+    {
+      "id": "insurance",
+      "name_hebrew": "ביטוחים",
+      "name_english": "Insurance",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 3,
+      "is_active": true
+    },
+    {
+      "id": "arnona",
+      "name_hebrew": "ארנונה",
+      "name_english": "Municipal Tax",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 4,
+      "is_active": true
+    },
+    {
+      "id": "vaad_bait",
+      "name_hebrew": "ועד בית",
+      "name_english": "Building Committee",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 5,
+      "is_active": true
+    },
+    {
+      "id": "energy",
+      "name_hebrew": "אנרגיה",
+      "name_english": "Energy/Utilities",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 6,
+      "is_active": true
+    },
+    {
+      "id": "fixed_expenses",
+      "name_hebrew": "הוצאות קבועות",
+      "name_english": "Fixed Expenses",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 7,
+      "is_active": true
+    },
+    {
+      "id": "variable_expenses",
+      "name_hebrew": "הוצאות משתנות (כא\"ש)",
+      "name_english": "Variable Expenses (Credit Cards)",
+      "type": "expense",
+      "is_fixed": false,
+      "sort_order": 8,
+      "is_active": true
+    },
+    {
+      "id": "extraordinary_expenses",
+      "name_hebrew": "משתנות חריגות",
+      "name_english": "Extraordinary Expenses",
+      "type": "expense",
+      "is_fixed": false,
+      "sort_order": 9,
+      "is_active": true
+    },
+    {
+      "id": "vehicle",
+      "name_hebrew": "רכב",
+      "name_english": "Vehicle",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 10,
+      "is_active": true
+    },
+    {
+      "id": "school_expenses",
+      "name_hebrew": "הוצאות בית ספר",
+      "name_english": "School Expenses",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 11,
+      "is_active": true
+    },
+    {
+      "id": "child1_activities",
+      "name_hebrew": "חוגים ילדה 1",
+      "name_english": "Child 1 Activities",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 12,
+      "is_active": true
+    },
+    {
+      "id": "kindergarten",
+      "name_hebrew": "גן",
+      "name_english": "Kindergarten",
+      "type": "expense",
+      "is_fixed": true,
+      "sort_order": 13,
+      "is_active": true
+    },
+    {
+      "id": "one_time_income",
+      "name_hebrew": "הכנסות חד\"פ",
+      "name_english": "One-Time Income",
+      "type": "income",
+      "is_fixed": false,
+      "sort_order": 14,
+      "is_active": true
+    },
+    {
+      "id": "transfers_in",
+      "name_hebrew": "העברות נכנסות",
+      "name_english": "Incoming Transfers",
+      "type": "income",
+      "is_fixed": false,
+      "sort_order": 15,
+      "is_active": true
+    },
+    {
+      "id": "salaries",
+      "name_hebrew": "משכורות",
+      "name_english": "Salaries",
+      "type": "income",
+      "is_fixed": true,
+      "sort_order": 16,
+      "is_active": true
+    },
+    {
+      "id": "child_allowance",
+      "name_hebrew": "קצבת ילדים",
+      "name_english": "Child Allowance",
+      "type": "income",
+      "is_fixed": true,
+      "sort_order": 17,
+      "is_active": true
+    }
+  ]
+}

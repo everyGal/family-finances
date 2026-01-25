@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monthly Budget Data Schema",
+  "description": "Schema for n8n to update monthly budget data",
+  "type": "object",
+  "properties": {
+    "months": {
+      "type": "array",
+      "description": "Array of monthly budget records",
+      "items": {
+        "type": "object",
+        "required": ["month", "year", "month_hebrew"],
+        "properties": {
+          "month": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "description": "Month in YYYY-MM format",
+            "examples": ["2024-01", "2024-12"]
+          },
+          "year": {
+            "type": "integer",
+            "description": "Year as integer",
+            "examples": [2024, 2025]
+          },
+          "month_hebrew": {
+            "type": "string",
+            "description": "Hebrew month abbreviation",
+            "examples": ["ינו-24", "פבר-24", "מרץ-24"]
+          },
+          "expenses": {
+            "type": "object",
+            "description": "All expense categories",
+            "properties": {
+              "mortgage": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Mortgage payment (משכנתא)"
+              },
+              "savings_investments": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Savings and investments (חסכונות/השקעות)"
+              },
+              "insurance": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Insurance payments (ביטוחים)"
+              },
+              "arnona": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Municipal tax (ארנונה)"
+              },
+              "vaad_bait": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Building committee fee (ועד בית)"
+              },
+              "energy": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Energy/utilities (אנרגיה)"
+              },
+              "fixed_expenses": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Other fixed expenses (הוצאות קבועות)"
+              },
+              "variable_expenses": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Variable expenses from credit cards (הוצאות משתנות כא\"ש)"
+              },
+              "extraordinary_expenses": {
+                "type": "number",
+                "minimum": 0,
+                "description": "One-time large expenses (משתנות חריגות)"
+              },
+              "vehicle": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Vehicle related expenses (רכב)"
+              },
+              "school_expenses": {
+                "type": "number",
+                "minimum": 0,
+                "description": "School expenses (הוצאות בית ספר)"
+              },
+              "child1_activities": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Child 1 activities/classes (חוגים ילדה 1)"
+              },
+              "kindergarten": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Kindergarten fees (גן)"
+              }
+            }
+          },
+          "income": {
+            "type": "object",
+            "description": "All income categories",
+            "properties": {
+              "one_time_income": {
+                "type": "number",
+                "minimum": 0,
+                "description": "One-time income (הכנסות חד\"פ)"
+              },
+              "transfers_in": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Incoming transfers (העברות נכנסות)"
+              },
+              "salaries": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Monthly salaries (משכורות)"
+              },
+              "child_allowance": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Child allowance from government (קצבת ילדים)"
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes for this month"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadata about the update",
+      "properties": {
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the update (e.g., 'n8n_credit_card', 'manual')"
+        },
+        "version": {
+          "type": "string",
+          "description": "Data format version"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "months": [
+    {
+      "month": "2024-01",
+      "year": 2024,
+      "month_hebrew": "ינו-24",
+      "expenses": {
+        "mortgage": 3000,
+        "savings_investments": 100,
+        "insurance": 1000,
+        "arnona": 500,
+        "vaad_bait": 100,
+        "energy": 0,
+        "fixed_expenses": 1000,
+        "variable_expenses": 5000,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 1017,
+        "child1_activities": 376,
+        "kindergarten": 4400
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 20000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "month": "2024-02",
+      "year": 2024,
+      "month_hebrew": "פבר-24",
+      "expenses": {
+        "mortgage": 3000,
+        "savings_investments": 100,
+        "insurance": 1000,
+        "arnona": 0,
+        "vaad_bait": 100,
+        "energy": 500,
+        "fixed_expenses": 1000,
+        "variable_expenses": 6000,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 1017,
+        "child1_activities": 376,
+        "kindergarten": 4400
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 20000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2024-02-29T23:59:59Z"
+    },
+    {
+      "month": "2024-03",
+      "year": 2024,
+      "month_hebrew": "מרץ-24",
+      "expenses": {
+        "mortgage": 3000,
+        "savings_investments": 100,
+        "insurance": 1000,
+        "arnona": 500,
+        "vaad_bait": 100,
+        "energy": 0,
+        "fixed_expenses": 1000,
+        "variable_expenses": 5000,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 1018,
+        "child1_activities": 376,
+        "kindergarten": 4400
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 20000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2024-03-31T23:59:59Z"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2024-03-31T23:59:59Z",
+    "source": "n8n_credit_card_processor",
+    "version": "1.0"
+  }
+}

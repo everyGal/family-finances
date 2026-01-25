@@ -1,0 +1,141 @@
+{
+  "savings_accounts": [
+    {
+      "id": "savings_romi_analyst",
+      "account_name": "חסכון לכל ילד - רומי (אנליסט)",
+      "account_type": "monthly",
+      "owner": "הדס",
+      "monthly_amount": 102,
+      "yearly_amount": 1224,
+      "accumulated": 18121,
+      "notes": "",
+      "sort_order": 1,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "savings_eli_analyst",
+      "account_name": "חסכון לכל ילד - אלי (אנליסט)",
+      "account_type": "monthly",
+      "owner": "הדס",
+      "monthly_amount": 102,
+      "yearly_amount": 1224,
+      "accumulated": 5425,
+      "notes": "",
+      "sort_order": 2,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "gemel_romi_analyst",
+      "account_name": "קופ\"ג להשקעה רומי (אנליסט)",
+      "account_type": "monthly",
+      "owner": "גל",
+      "monthly_amount": 300,
+      "yearly_amount": 3600,
+      "accumulated": 37226,
+      "notes": "",
+      "sort_order": 3,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "gemel_eli_analyst",
+      "account_name": "קופ\"ג להשקעה אלי (אנליסט)",
+      "account_type": "monthly",
+      "owner": "גל",
+      "monthly_amount": 300,
+      "yearly_amount": 3600,
+      "accumulated": 7513,
+      "notes": "",
+      "sort_order": 4,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "gemel_parents_mor",
+      "account_name": "קופ\"ג להשקעה הורים (מור)",
+      "account_type": "monthly",
+      "owner": "גל",
+      "monthly_amount": 1500,
+      "yearly_amount": 18000,
+      "accumulated": 81596,
+      "notes": "",
+      "sort_order": 5,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "tria",
+      "account_name": "תריא",
+      "account_type": "monthly",
+      "owner": "shared",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 1027,
+      "notes": "",
+      "sort_order": 6,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "kasha_gal_meitav",
+      "account_name": "קה\"ש גל (מיטב)",
+      "account_type": "fixed",
+      "owner": "גל",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 10000,
+      "notes": "",
+      "sort_order": 7,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "kasha_gal_harel",
+      "account_name": "קה\"ש גל (הראל) חדש",
+      "account_type": "fixed",
+      "owner": "גל",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 15000,
+      "notes": "",
+      "sort_order": 8,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "kasha_hadas_mor",
+      "account_name": "קה\"ש הדס (מור גמל ופנסיה)",
+      "account_type": "fixed",
+      "owner": "הדס",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 10000,
+      "notes": "",
+      "sort_order": 9,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "cash_mizrahi",
+      "account_name": "חשבון מזרחי (ש\"ח+מט\"ח)",
+      "account_type": "cash",
+      "owner": "shared",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 50000,
+      "notes": "",
+      "sort_order": 10,
+      "updated_at": "2024-01-31T23:59:59Z"
+    },
+    {
+      "id": "cash_leumi",
+      "account_name": "חשבון הבינלאומי (ש\"ח+ני\"ע)",
+      "account_type": "cash",
+      "owner": "shared",
+      "monthly_amount": 0,
+      "yearly_amount": 0,
+      "accumulated": 50000,
+      "notes": "",
+      "sort_order": 11,
+      "updated_at": "2024-01-31T23:59:59Z"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2024-01-31T23:59:59Z",
+    "total_monthly_savings": 2304,
+    "total_accumulated": 150908
+  }
+}
