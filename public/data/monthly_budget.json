@@ -1,6 +1,174 @@
 {
   "months": [
     {
+      "month": "2023-01",
+      "year": 2023,
+      "month_hebrew": "ינו-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 480,
+        "vaad_bait": 90,
+        "energy": 0,
+        "fixed_expenses": 900,
+        "variable_expenses": 4800,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 980,
+        "child1_activities": 350,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 19000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2023-01-31T23:59:59Z"
+    },
+    {
+      "month": "2023-02",
+      "year": 2023,
+      "month_hebrew": "פבר-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 0,
+        "vaad_bait": 90,
+        "energy": 520,
+        "fixed_expenses": 900,
+        "variable_expenses": 7200,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 980,
+        "child1_activities": 350,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 19000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2023-02-28T23:59:59Z"
+    },
+    {
+      "month": "2023-03",
+      "year": 2023,
+      "month_hebrew": "מרץ-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 480,
+        "vaad_bait": 90,
+        "energy": 0,
+        "fixed_expenses": 900,
+        "variable_expenses": 4600,
+        "extraordinary_expenses": 500,
+        "vehicle": 331,
+        "school_expenses": 980,
+        "child1_activities": 350,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 19000,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2023-03-31T23:59:59Z"
+    },
+    {
+      "month": "2023-04",
+      "year": 2023,
+      "month_hebrew": "אפר-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 480,
+        "vaad_bait": 90,
+        "energy": 300,
+        "fixed_expenses": 900,
+        "variable_expenses": 5200,
+        "extraordinary_expenses": 1500,
+        "vehicle": 331,
+        "school_expenses": 980,
+        "child1_activities": 350,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 3000,
+        "transfers_in": 1500,
+        "salaries": 19000,
+        "child_allowance": 261
+      },
+      "notes": "בונוס פסח",
+      "updated_at": "2023-04-30T23:59:59Z"
+    },
+    {
+      "month": "2023-05",
+      "year": 2023,
+      "month_hebrew": "מאי-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 0,
+        "vaad_bait": 90,
+        "energy": 380,
+        "fixed_expenses": 900,
+        "variable_expenses": 4500,
+        "extraordinary_expenses": 0,
+        "vehicle": 331,
+        "school_expenses": 980,
+        "child1_activities": 350,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 19500,
+        "child_allowance": 261
+      },
+      "notes": "",
+      "updated_at": "2023-05-31T23:59:59Z"
+    },
+    {
+      "month": "2023-06",
+      "year": 2023,
+      "month_hebrew": "יונ-23",
+      "expenses": {
+        "mortgage": 2850,
+        "savings_investments": 100,
+        "insurance": 950,
+        "arnona": 480,
+        "vaad_bait": 90,
+        "energy": 550,
+        "fixed_expenses": 900,
+        "variable_expenses": 5000,
+        "extraordinary_expenses": 0,
+        "vehicle": 400,
+        "school_expenses": 0,
+        "child1_activities": 0,
+        "kindergarten": 4200
+      },
+      "income": {
+        "one_time_income": 0,
+        "transfers_in": 1500,
+        "salaries": 19500,
+        "child_allowance": 261
+      },
+      "notes": "תחילת חופש גדול",
+      "updated_at": "2023-06-30T23:59:59Z"
+    },
+    {
       "month": "2024-01",
       "year": 2024,
       "month_hebrew": "ינו-24",

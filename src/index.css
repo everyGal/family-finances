@@ -19,6 +19,16 @@
   }
 }
 
+/* Row selection highlight */
+@layer components {
+  .selected-row {
+    @apply bg-blue-50;
+  }
+  .selected-row:hover {
+    @apply bg-blue-100/50;
+  }
+}
+
 /* Custom scrollbar for tables */
 @layer utilities {
   .scrollbar-thin {
