@@ -271,9 +271,10 @@ This avoids needing direct filesystem access or a backend API.
 
 ## Next Steps
 
-1. **Set up n8n instance** — deploy self-hosted or create n8n cloud account
-2. **Create `.mcp.json`** — add n8n server URL and bearer token to project root (file is gitignored)
-3. **Restart Claude Code** — MCP servers are loaded at startup
-4. **Re-validate** — run this validation again to confirm connectivity
-5. Once MCP is connected, create Workflow 1 using the n8n API
-6. Test with sample credit card data
+1. **Set up n8n instance** — deploy self-hosted or create [n8n cloud](https://n8n.io) account
+2. **Copy `.mcp.json.example` → `.mcp.json`** — fill in your n8n URL and API key (`.mcp.json` is gitignored)
+3. **Or use CLI** — `claude mcp add n8n-mcp -e MCP_MODE=stdio -e LOG_LEVEL=error -e DISABLE_CONSOLE_OUTPUT=true -e N8N_API_URL=<url> -e N8N_API_KEY=<key> -- npx n8n-mcp`
+4. **Restart Claude Code** — MCP servers are loaded at startup
+5. **Re-validate** — run this validation again to confirm connectivity
+6. Once MCP is connected, create Workflow 1 using the n8n API
+7. Test with sample credit card data
