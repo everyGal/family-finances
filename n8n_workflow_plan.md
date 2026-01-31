@@ -1,8 +1,8 @@
 # n8n Workflow Implementation Plan
 
-## Status: Planning Phase
+## Status: Blocked — MCP Not Connected
 **Date:** 2026-01-31
-**Branch:** `claude/plan-n8n-workflow-Bqc8O`
+**Last Validated:** 2026-01-31
 
 ---
 
@@ -263,8 +263,17 @@ This avoids needing direct filesystem access or a backend API.
 
 ---
 
+## MCP Validation Log
+
+| Date | Result | Details |
+|------|--------|---------|
+| 2026-01-31 | **NOT AVAILABLE** | `.mcp.json` not present (gitignored). No n8n MCP server configured. Phase 1 blocker remains. |
+
 ## Next Steps
 
-1. **Fix n8n MCP connection** — verify n8n instance URL and API key are configured
-2. Once MCP is connected, create Workflow 1 using the n8n API
-3. Test with sample credit card data
+1. **Set up n8n instance** — deploy self-hosted or create n8n cloud account
+2. **Create `.mcp.json`** — add n8n server URL and bearer token to project root (file is gitignored)
+3. **Restart Claude Code** — MCP servers are loaded at startup
+4. **Re-validate** — run this validation again to confirm connectivity
+5. Once MCP is connected, create Workflow 1 using the n8n API
+6. Test with sample credit card data
