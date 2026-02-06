@@ -162,7 +162,7 @@ if (state.error) return <ErrorMessage error={state.error} />;
 
 ## Available Skills
 
-This project uses 6 Claude Code skills for optimal development:
+This project uses 13 Claude Code skills for optimal development:
 
 **Core Development:**
 - `frontend-design` - Professional UI/UX design (Anthropic)
@@ -173,12 +173,22 @@ This project uses 6 Claude Code skills for optimal development:
 - `pdf` - Export budget reports to PDF (Anthropic)
 - `xlsx` - Export/import Excel spreadsheets (Anthropic)
 
+**n8n Workflow Development (user-level):**
+- `n8n-workflow-patterns` - 5 architectural patterns: webhook, HTTP API, DB, AI agent, scheduled
+- `n8n-expression-syntax` - Expression `{{ }}` syntax, `$json/$node/$now` variables
+- `n8n-code-javascript` - JavaScript in Code nodes, `$input/$helpers`, error prevention
+- `n8n-code-python` - Python in Code nodes (standard library only)
+- `n8n-mcp-tools-expert` - n8n-mcp MCP tools: search, validate, create/edit workflows
+- `n8n-node-configuration` - Operation-aware node config, property dependencies
+- `n8n-validation-expert` - Validation errors, profiles, false positives, fix cycles
+
 **Extensibility:**
 - `skill-creator` - Create custom project-specific skills (Anthropic)
 
 **Important:** Assume these skills are installed and available. Use them automatically when relevant.
 
 For full details and installation instructions, see `RECOMMENDED_SKILLS.md`.
+For n8n skills details, see `N8N_SKILLS_PLAN.md`.
 
 ## Future Enhancements (Not MVP)
 These are planned but not in initial implementation:
