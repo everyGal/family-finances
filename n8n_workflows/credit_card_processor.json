@@ -1,0 +1,224 @@
+{
+  "name": "Credit Card Report Processor",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "cc-trigger",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "fileSelector": "data"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "id": "cc-read-file",
+      "name": "Read Credit Card PDF"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={{$env.GEMINI_API_KEY}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"inline_data\": {\n            \"mime_type\": \"application/pdf\",\n            \"data\": \"{{ $binary.data.toBase64() }}\"\n          }\n        },\n        {\n          \"text\": \"Extract all transactions from this Israeli credit card statement. For each transaction return: date (YYYY-MM-DD), description (original Hebrew), amount (number in ILS, positive), vendor_name (Hebrew). Return ONLY valid JSON array, no markdown. Example: [{\\\"date\\\":\\\"2024-01-05\\\",\\\"description\\\":\\\"שופרסל דיל\\\",\\\"amount\\\":450.50,\\\"vendor_name\\\":\\\"שופרסל\\\"}]\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseMimeType\": \"application/json\",\n    \"responseSchema\": {\n      \"type\": \"ARRAY\",\n      \"items\": {\n        \"type\": \"OBJECT\",\n        \"properties\": {\n          \"date\": { \"type\": \"STRING\" },\n          \"description\": { \"type\": \"STRING\" },\n          \"amount\": { \"type\": \"NUMBER\" },\n          \"vendor_name\": { \"type\": \"STRING\" }\n        },\n        \"required\": [\"date\", \"description\", \"amount\", \"vendor_name\"]\n      }\n    }\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "id": "cc-gemini",
+      "name": "Gemini Flash - Extract Transactions"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.candidates }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [660, 0],
+      "id": "cc-check-response",
+      "name": "Check Gemini Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Categorization rules — vendor patterns → budget category\nconst categoryRules = [\n  { pattern: /סופר|שופרסל|רמי לוי|מגה|יוחננוף|אושר עד|חצי חינם|ויקטורי/i, category: 'variable_expenses' },\n  { pattern: /דלק|פז|סונול|דור אלון|yellow|טסט|מוסך/i, category: 'vehicle' },\n  { pattern: /חשמל|גז|מים|עין נטפים|חברת החשמל/i, category: 'energy' },\n  { pattern: /ביטוח|הפניקס|מגדל|הראל|כלל|מנורה/i, category: 'insurance' },\n  { pattern: /ארנונה|עירייה|עיריית/i, category: 'arnona' },\n  { pattern: /בית ספר|ביה\"ס|אסכולה|הורים|תשלומים לביה/i, category: 'school_expenses' },\n  { pattern: /חוג|שחייה|ג'ודו|בלט|מוזיקה|ספורט/i, category: 'child1_activities' },\n  { pattern: /גן|גנון|צהרון|משפחתון/i, category: 'kindergarten' },\n  { pattern: /ועד בית/i, category: 'vaad_bait' },\n];\n\nconst EXTRAORDINARY_THRESHOLD = 2000;\nconst transactions = JSON.parse($input.first().json.candidates[0].content.parts[0].text);\n\nconst categorized = transactions.map(tx => {\n  let category = 'variable_expenses';\n  for (const rule of categoryRules) {\n    if (rule.pattern.test(tx.vendor_name) || rule.pattern.test(tx.description)) {\n      category = rule.category;\n      break;\n    }\n  }\n  if (tx.amount >= EXTRAORDINARY_THRESHOLD && category === 'variable_expenses') {\n    category = 'extraordinary_expenses';\n  }\n  return { ...tx, category };\n});\n\nreturn [{ json: { categorized, raw_count: transactions.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -60],
+      "id": "cc-categorize",
+      "name": "Categorize Transactions"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { categorized } = $input.first().json;\n\nconst firstDate = categorized[0]?.date || '';\nconst [year, month] = firstDate.split('-');\n\nconst hebrewMonths = {\n  '01': 'ינו', '02': 'פבר', '03': 'מרץ', '04': 'אפר',\n  '05': 'מאי', '06': 'יונ', '07': 'יול', '08': 'אוג',\n  '09': 'ספט', '10': 'אוק', '11': 'נוב', '12': 'דצמ'\n};\n\nconst totals = {};\nfor (const tx of categorized) {\n  totals[tx.category] = (totals[tx.category] || 0) + tx.amount;\n}\n\nfor (const key of Object.keys(totals)) {\n  totals[key] = Math.round(totals[key]);\n}\n\nconst monthData = {\n  month: `${year}-${month}`,\n  year: parseInt(year),\n  month_hebrew: `${hebrewMonths[month]}-${year.slice(2)}`,\n  expenses: totals,\n  updated_at: new Date().toISOString()\n};\n\nreturn [{ json: { monthData } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, -60],
+      "id": "cc-calc-totals",
+      "name": "Calculate Category Totals"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { monthData } = $input.first().json;\n\n// Validation\nconst VALID_EXPENSE_KEYS = [\n  'mortgage', 'savings_investments', 'insurance', 'arnona',\n  'vaad_bait', 'energy', 'fixed_expenses', 'variable_expenses',\n  'extraordinary_expenses', 'vehicle', 'school_expenses',\n  'child1_activities', 'kindergarten'\n];\n\nconst errors = [];\nif (!/^\\d{4}-\\d{2}$/.test(monthData.month)) {\n  errors.push(`Invalid month format: ${monthData.month}`);\n}\nif (typeof monthData.year !== 'number') {\n  errors.push(`Year must be a number: ${monthData.year}`);\n}\nif (!monthData.month_hebrew) {\n  errors.push('Missing month_hebrew');\n}\nif (monthData.expenses) {\n  for (const [key, val] of Object.entries(monthData.expenses)) {\n    if (!VALID_EXPENSE_KEYS.includes(key)) {\n      errors.push(`Unknown expense key: ${key}`);\n    }\n    if (typeof val !== 'number' || val < 0) {\n      errors.push(`Invalid amount for ${key}: ${val}`);\n    }\n  }\n}\n\nif (errors.length > 0) {\n  throw new Error(`Validation failed: ${errors.join('; ')}`);\n}\n\nconst output = {\n  months: [monthData],\n  metadata: {\n    last_updated: new Date().toISOString(),\n    source: 'n8n_credit_card_processor',\n    version: '1.0'\n  }\n};\n\nreturn [{ json: output }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, -60],
+      "id": "cc-build-output",
+      "name": "Validate & Build Output JSON"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "fileName": "=budget_update_{{ $json.months[0].month }}.json"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1540, -60],
+      "id": "cc-convert-file",
+      "name": "Convert to JSON File"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    error: true,\n    workflow: 'Credit Card Report Processor',\n    message: 'Gemini API did not return valid candidates. Check your GEMINI_API_KEY environment variable and the input file.',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 140],
+      "id": "cc-error-handler",
+      "name": "Error - No Gemini Response"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Credit Card PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Credit Card PDF": {
+      "main": [
+        [
+          {
+            "node": "Gemini Flash - Extract Transactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Flash - Extract Transactions": {
+      "main": [
+        [
+          {
+            "node": "Check Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Gemini Response": {
+      "main": [
+        [
+          {
+            "node": "Categorize Transactions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error - No Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize Transactions": {
+      "main": [
+        [
+          {
+            "node": "Calculate Category Totals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Category Totals": {
+      "main": [
+        [
+          {
+            "node": "Validate & Build Output JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Build Output JSON": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
