@@ -1,0 +1,84 @@
+{
+  "name": "Savings Account Updater",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "sav-trigger",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// EDIT THESE VALUES BEFORE RUNNING\n// Update accumulated balances for each account\n// ============================================\nconst accountUpdates = [\n  { id: 'savings_romi_analyst', accumulated: 18121 },\n  { id: 'savings_eli_analyst', accumulated: 5425 },\n  { id: 'gemel_romi_analyst', accumulated: 37226 },\n  { id: 'gemel_eli_analyst', accumulated: 7513 },\n  { id: 'gemel_parents_mor', accumulated: 81596 },\n  { id: 'tria', accumulated: 1027 },\n  { id: 'kasha_gal_meitav', accumulated: 10000 },\n  { id: 'kasha_gal_harel', accumulated: 15000 },\n  { id: 'kasha_hadas_mor', accumulated: 10000 },\n  { id: 'cash_mizrahi', accumulated: 50000 },\n  { id: 'cash_leumi', accumulated: 50000 },\n];\n\nreturn [{ json: { accountUpdates } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0],
+      "id": "sav-input",
+      "name": "Define Account Updates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { accountUpdates } = $input.first().json;\n\nconst baseAccounts = [\n  { id: 'savings_romi_analyst', account_name: 'חסכון לכל ילד - רומי (אנליסט)', account_type: 'monthly', owner: 'הדס', monthly_amount: 102, yearly_amount: 1224, sort_order: 1 },\n  { id: 'savings_eli_analyst', account_name: 'חסכון לכל ילד - אלי (אנליסט)', account_type: 'monthly', owner: 'הדס', monthly_amount: 102, yearly_amount: 1224, sort_order: 2 },\n  { id: 'gemel_romi_analyst', account_name: 'קופ\"ג להשקעה רומי (אנליסט)', account_type: 'monthly', owner: 'גל', monthly_amount: 300, yearly_amount: 3600, sort_order: 3 },\n  { id: 'gemel_eli_analyst', account_name: 'קופ\"ג להשקעה אלי (אנליסט)', account_type: 'monthly', owner: 'גל', monthly_amount: 300, yearly_amount: 3600, sort_order: 4 },\n  { id: 'gemel_parents_mor', account_name: 'קופ\"ג להשקעה הורים (מור)', account_type: 'monthly', owner: 'גל', monthly_amount: 1500, yearly_amount: 18000, sort_order: 5 },\n  { id: 'tria', account_name: 'תריא', account_type: 'monthly', owner: 'shared', monthly_amount: 0, yearly_amount: 0, sort_order: 6 },\n  { id: 'kasha_gal_meitav', account_name: 'קה\"ש גל (מיטב)', account_type: 'fixed', owner: 'גל', monthly_amount: 0, yearly_amount: 0, sort_order: 7 },\n  { id: 'kasha_gal_harel', account_name: 'קה\"ש גל (הראל) חדש', account_type: 'fixed', owner: 'גל', monthly_amount: 0, yearly_amount: 0, sort_order: 8 },\n  { id: 'kasha_hadas_mor', account_name: 'קה\"ש הדס (מור גמל ופנסיה)', account_type: 'fixed', owner: 'הדס', monthly_amount: 0, yearly_amount: 0, sort_order: 9 },\n  { id: 'cash_mizrahi', account_name: 'חשבון מזרחי (ש\"ח+מט\"ח)', account_type: 'cash', owner: 'shared', monthly_amount: 0, yearly_amount: 0, sort_order: 10 },\n  { id: 'cash_leumi', account_name: 'חשבון הבינלאומי (ש\"ח+ני\"ע)', account_type: 'cash', owner: 'shared', monthly_amount: 0, yearly_amount: 0, sort_order: 11 },\n];\n\nconst VALID_IDS = baseAccounts.map(a => a.id);\nconst errors = [];\n\nfor (const update of accountUpdates) {\n  if (!VALID_IDS.includes(update.id)) {\n    errors.push(`Unknown account ID: ${update.id}`);\n  }\n  if (typeof update.accumulated !== 'number' || update.accumulated < 0) {\n    errors.push(`Invalid accumulated value for ${update.id}: ${update.accumulated}`);\n  }\n}\n\nif (errors.length > 0) {\n  throw new Error(`Validation failed: ${errors.join('; ')}`);\n}\n\nconst now = new Date().toISOString();\nconst updatedAccounts = baseAccounts.map(acct => {\n  const update = accountUpdates.find(u => u.id === acct.id);\n  return {\n    ...acct,\n    accumulated: update ? update.accumulated : 0,\n    notes: '',\n    updated_at: now\n  };\n});\n\nconst totalMonthly = updatedAccounts.reduce((sum, a) => sum + (a.monthly_amount || 0), 0);\nconst totalAccumulated = updatedAccounts.reduce((sum, a) => sum + (a.accumulated || 0), 0);\n\nconst output = {\n  savings_accounts: updatedAccounts,\n  metadata: {\n    last_updated: now,\n    total_monthly_savings: totalMonthly,\n    total_accumulated: totalAccumulated\n  }\n};\n\nreturn [{ json: output }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "sav-build",
+      "name": "Build Savings JSON"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "fileName": "=savings_update_{{ $now.format('yyyy-MM-dd') }}.json"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [660, 0],
+      "id": "sav-convert-file",
+      "name": "Convert to JSON File"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Define Account Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Account Updates": {
+      "main": [
+        [
+          {
+            "node": "Build Savings JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Savings JSON": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

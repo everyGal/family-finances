@@ -1,0 +1,203 @@
+{
+  "name": "Invoice Receipt Processor",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "inv-trigger",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "fileSelector": "data"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "id": "inv-read-file",
+      "name": "Read Invoice File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={{$env.GEMINI_API_KEY}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"inline_data\": {\n            \"mime_type\": \"{{ $binary.data.mimeType }}\",\n            \"data\": \"{{ $binary.data.toBase64() }}\"\n          }\n        },\n        {\n          \"text\": \"Extract from this Israeli invoice/receipt: the total amount in ILS, the invoice date, the vendor/company name, and a brief description. All text is Hebrew.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseMimeType\": \"application/json\",\n    \"responseSchema\": {\n      \"type\": \"OBJECT\",\n      \"properties\": {\n        \"amount\": { \"type\": \"NUMBER\", \"description\": \"Total amount in ILS\" },\n        \"date\": { \"type\": \"STRING\", \"description\": \"Invoice date YYYY-MM-DD\" },\n        \"vendor_name\": { \"type\": \"STRING\", \"description\": \"Vendor/company name in Hebrew\" },\n        \"description\": { \"type\": \"STRING\", \"description\": \"Brief description of the invoice\" }\n      },\n      \"required\": [\"amount\", \"date\", \"vendor_name\"]\n    }\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "id": "inv-gemini",
+      "name": "Gemini Flash - Extract Invoice"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.candidates }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [660, 0],
+      "id": "inv-check-response",
+      "name": "Check Gemini Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const invoice = JSON.parse($input.first().json.candidates[0].content.parts[0].text);\n\nconst vendorCategoryMap = [\n  { pattern: /חברת החשמל|חשמל/i, category: 'energy' },\n  { pattern: /גז|סופרגז/i, category: 'energy' },\n  { pattern: /מים|מקורות|עין נטפים/i, category: 'energy' },\n  { pattern: /עירייה|ארנונה/i, category: 'arnona' },\n  { pattern: /ביטוח|הפניקס|מגדל|הראל|כלל/i, category: 'insurance' },\n  { pattern: /ועד בית/i, category: 'vaad_bait' },\n  { pattern: /בית ספר|משרד החינוך/i, category: 'school_expenses' },\n  { pattern: /גן|צהרון|גנון/i, category: 'kindergarten' },\n  { pattern: /דלק|רכב|טסט|מוסך/i, category: 'vehicle' },\n  { pattern: /חוג|שחייה|ספורט/i, category: 'child1_activities' },\n];\n\nlet category = 'fixed_expenses';\nfor (const rule of vendorCategoryMap) {\n  if (rule.pattern.test(invoice.vendor_name) || rule.pattern.test(invoice.description || '')) {\n    category = rule.category;\n    break;\n  }\n}\n\nconst [year, month] = invoice.date.split('-');\nconst hebrewMonths = {\n  '01': 'ינו', '02': 'פבר', '03': 'מרץ', '04': 'אפר',\n  '05': 'מאי', '06': 'יונ', '07': 'יול', '08': 'אוג',\n  '09': 'ספט', '10': 'אוק', '11': 'נוב', '12': 'דצמ'\n};\n\nreturn [{\n  json: {\n    month: `${year}-${month}`,\n    year: parseInt(year),\n    month_hebrew: `${hebrewMonths[month]}-${year.slice(2)}`,\n    category,\n    amount: Math.round(invoice.amount),\n    vendor_name: invoice.vendor_name,\n    description: invoice.description || ''\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -60],
+      "id": "inv-map-category",
+      "name": "Map Vendor to Category"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Validation\nconst VALID_EXPENSE_KEYS = [\n  'mortgage', 'savings_investments', 'insurance', 'arnona',\n  'vaad_bait', 'energy', 'fixed_expenses', 'variable_expenses',\n  'extraordinary_expenses', 'vehicle', 'school_expenses',\n  'child1_activities', 'kindergarten'\n];\n\nconst errors = [];\nif (!/^\\d{4}-\\d{2}$/.test(data.month)) {\n  errors.push(`Invalid month format: ${data.month}`);\n}\nif (typeof data.year !== 'number') {\n  errors.push(`Year must be a number: ${data.year}`);\n}\nif (!data.month_hebrew) {\n  errors.push('Missing month_hebrew');\n}\nif (!VALID_EXPENSE_KEYS.includes(data.category)) {\n  errors.push(`Unknown expense category: ${data.category}`);\n}\nif (typeof data.amount !== 'number' || data.amount < 0) {\n  errors.push(`Invalid amount: ${data.amount}`);\n}\n\nif (errors.length > 0) {\n  throw new Error(`Validation failed: ${errors.join('; ')}`);\n}\n\nconst output = {\n  months: [\n    {\n      month: data.month,\n      year: data.year,\n      month_hebrew: data.month_hebrew,\n      expenses: {\n        [data.category]: data.amount\n      },\n      notes: `${data.vendor_name}: ${data.description}`,\n      updated_at: new Date().toISOString()\n    }\n  ],\n  metadata: {\n    last_updated: new Date().toISOString(),\n    source: 'n8n_invoice_processor',\n    version: '1.0'\n  }\n};\n\nreturn [{ json: output }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, -60],
+      "id": "inv-build-output",
+      "name": "Validate & Build Output JSON"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "fileName": "=invoice_update_{{ $json.months[0].month }}.json"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1320, -60],
+      "id": "inv-convert-file",
+      "name": "Convert to JSON File"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    error: true,\n    workflow: 'Invoice Receipt Processor',\n    message: 'Gemini API did not return valid candidates. Check your GEMINI_API_KEY environment variable and the input file.',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 140],
+      "id": "inv-error-handler",
+      "name": "Error - No Gemini Response"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Invoice File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoice File": {
+      "main": [
+        [
+          {
+            "node": "Gemini Flash - Extract Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Flash - Extract Invoice": {
+      "main": [
+        [
+          {
+            "node": "Check Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Gemini Response": {
+      "main": [
+        [
+          {
+            "node": "Map Vendor to Category",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error - No Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Vendor to Category": {
+      "main": [
+        [
+          {
+            "node": "Validate & Build Output JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Build Output JSON": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
