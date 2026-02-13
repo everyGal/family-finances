@@ -2,53 +2,92 @@
   "name": "Credit Card Report Processor",
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [0, 0],
-      "id": "cc-trigger",
-      "name": "Manual Trigger"
-    },
-    {
       "parameters": {
-        "fileSelector": "data"
-      },
-      "type": "n8n-nodes-base.readBinaryFile",
-      "typeVersion": 1,
-      "position": [220, 0],
-      "id": "cc-read-file",
-      "name": "Read Credit Card PDF"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={{$env.GEMINI_API_KEY}}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "pollTimes": {
+          "item": [
             {
-              "name": "Content-Type",
-              "value": "application/json"
+              "mode": "everyMonth",
+              "dayOfMonth": 17
             }
           ]
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"inline_data\": {\n            \"mime_type\": \"application/pdf\",\n            \"data\": \"{{ $binary.data.toBase64() }}\"\n          }\n        },\n        {\n          \"text\": \"Extract all transactions from this Israeli credit card statement. For each transaction return: date (YYYY-MM-DD), description (original Hebrew), amount (number in ILS, positive), vendor_name (Hebrew). Return ONLY valid JSON array, no markdown. Example: [{\\\"date\\\":\\\"2024-01-05\\\",\\\"description\\\":\\\"שופרסל דיל\\\",\\\"amount\\\":450.50,\\\"vendor_name\\\":\\\"שופרסל\\\"}]\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"responseMimeType\": \"application/json\",\n    \"responseSchema\": {\n      \"type\": \"ARRAY\",\n      \"items\": {\n        \"type\": \"OBJECT\",\n        \"properties\": {\n          \"date\": { \"type\": \"STRING\" },\n          \"description\": { \"type\": \"STRING\" },\n          \"amount\": { \"type\": \"NUMBER\" },\n          \"vendor_name\": { \"type\": \"STRING\" }\n        },\n        \"required\": [\"date\", \"description\", \"amount\", \"vendor_name\"]\n      }\n    }\n  }\n}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          },
-          "timeout": 60000
-        }
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "event": "fileCreated",
+        "options": {}
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [440, 0],
-      "id": "cc-gemini",
-      "name": "Gemini Flash - Extract Transactions"
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [-208, 0],
+      "id": "cc-drive-trigger",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [16, 0],
+      "id": "cc-download-file",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list"
+        },
+        "text": "Extract all transactions from this Israeli credit card statement. For each transaction return: date (YYYY-MM-DD), description (original Hebrew), amount (number in ILS, positive), vendor_name (Hebrew). Return ONLY valid JSON array, no markdown.",
+        "inputType": "binary",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [272, 0],
+      "id": "cc-gemini-analyze",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Gemini response text into individual transaction items\nconst response = $input.item.json;\nlet rawText = \"\";\n\ntry {\n    // Try standard Gemini API response path\n    rawText = response.candidates[0].content.parts[0].text;\n} catch (e) {\n    // Fallback for n8n AI node simplified output\n    rawText = response.text || \"\";\n}\n\n// Clean Markdown code fences if present\nlet cleanJson = rawText.replace(/```json|```/g, \"\").trim();\n\n// Fix common Gemini JSON issues (trailing commas)\ncleanJson = cleanJson.replace(/,\\s*\\]/g, \"]\").replace(/,\\s*\\}/g, \"}\");\n\ntry {\n    const parsedData = JSON.parse(cleanJson);\n    \n    if (Array.isArray(parsedData)) {\n        return parsedData.map(item => ({ json: item }));\n    } else {\n        return [{ json: parsedData }];\n    }\n} catch (error) {\n    return [{ json: { error: \"Invalid JSON format\", raw: cleanJson } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [464, 0],
+      "id": "cc-parse-response",
+      "name": "Code in JavaScript"
     },
     {
       "parameters": {
@@ -61,30 +100,31 @@
           },
           "conditions": [
             {
-              "leftValue": "={{ $json.candidates }}",
+              "leftValue": "={{ $json.error }}",
               "rightValue": "",
               "operator": {
-                "type": "array",
-                "operation": "notEmpty"
+                "type": "string",
+                "operation": "notExists"
               }
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [660, 0],
+      "position": [672, 0],
       "id": "cc-check-response",
       "name": "Check Gemini Response"
     },
     {
       "parameters": {
-        "jsCode": "// Categorization rules — vendor patterns → budget category\nconst categoryRules = [\n  { pattern: /סופר|שופרסל|רמי לוי|מגה|יוחננוף|אושר עד|חצי חינם|ויקטורי/i, category: 'variable_expenses' },\n  { pattern: /דלק|פז|סונול|דור אלון|yellow|טסט|מוסך/i, category: 'vehicle' },\n  { pattern: /חשמל|גז|מים|עין נטפים|חברת החשמל/i, category: 'energy' },\n  { pattern: /ביטוח|הפניקס|מגדל|הראל|כלל|מנורה/i, category: 'insurance' },\n  { pattern: /ארנונה|עירייה|עיריית/i, category: 'arnona' },\n  { pattern: /בית ספר|ביה\"ס|אסכולה|הורים|תשלומים לביה/i, category: 'school_expenses' },\n  { pattern: /חוג|שחייה|ג'ודו|בלט|מוזיקה|ספורט/i, category: 'child1_activities' },\n  { pattern: /גן|גנון|צהרון|משפחתון/i, category: 'kindergarten' },\n  { pattern: /ועד בית/i, category: 'vaad_bait' },\n];\n\nconst EXTRAORDINARY_THRESHOLD = 2000;\nconst transactions = JSON.parse($input.first().json.candidates[0].content.parts[0].text);\n\nconst categorized = transactions.map(tx => {\n  let category = 'variable_expenses';\n  for (const rule of categoryRules) {\n    if (rule.pattern.test(tx.vendor_name) || rule.pattern.test(tx.description)) {\n      category = rule.category;\n      break;\n    }\n  }\n  if (tx.amount >= EXTRAORDINARY_THRESHOLD && category === 'variable_expenses') {\n    category = 'extraordinary_expenses';\n  }\n  return { ...tx, category };\n});\n\nreturn [{ json: { categorized, raw_count: transactions.length } }];"
+        "jsCode": "// Categorization rules — vendor patterns → budget category\nconst categoryRules = [\n  { pattern: /סופר|שופרסל|רמי לוי|מגה|יוחננוף|אושר עד|חצי חינם|ויקטורי/i, category: 'variable_expenses' },\n  { pattern: /דלק|פז|סונול|דור אלון|yellow|טסט|מוסך/i, category: 'vehicle' },\n  { pattern: /חשמל|גז|מים|עין נטפים|חברת החשמל/i, category: 'energy' },\n  { pattern: /ביטוח|הפניקס|מגדל|הראל|כלל|מנורה/i, category: 'insurance' },\n  { pattern: /ארנונה|עירייה|עיריית/i, category: 'arnona' },\n  { pattern: /בית ספר|ביה\"ס|אסכולה|הורים|תשלומים לביה/i, category: 'school_expenses' },\n  { pattern: /חוג|שחייה|ג'ודו|בלט|מוזיקה|ספורט/i, category: 'child1_activities' },\n  { pattern: /גן|גנון|צהרון|משפחתון/i, category: 'kindergarten' },\n  { pattern: /ועד בית/i, category: 'vaad_bait' },\n];\n\nconst EXTRAORDINARY_THRESHOLD = 2000;\n\n// Collect all transaction items from the Code node output\n// Each item is already a parsed object { date, description, amount, vendor_name }\nconst transactions = $input.all().map(item => item.json);\n\nconst categorized = transactions.map(tx => {\n  let category = 'variable_expenses';\n  for (const rule of categoryRules) {\n    if (rule.pattern.test(tx.vendor_name) || rule.pattern.test(tx.description)) {\n      category = rule.category;\n      break;\n    }\n  }\n  if (tx.amount >= EXTRAORDINARY_THRESHOLD && category === 'variable_expenses') {\n    category = 'extraordinary_expenses';\n  }\n  return { ...tx, category };\n});\n\nreturn [{ json: { categorized, raw_count: transactions.length } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [880, -60],
+      "position": [880, -64],
       "id": "cc-categorize",
       "name": "Categorize Transactions"
     },
@@ -94,7 +134,7 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, -60],
+      "position": [1104, -64],
       "id": "cc-calc-totals",
       "name": "Calculate Category Totals"
     },
@@ -104,7 +144,7 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, -60],
+      "position": [1328, -64],
       "id": "cc-build-output",
       "name": "Validate & Build Output JSON"
     },
@@ -117,45 +157,56 @@
       },
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
-      "position": [1540, -60],
+      "position": [1552, -64],
       "id": "cc-convert-file",
       "name": "Convert to JSON File"
     },
     {
       "parameters": {
-        "jsCode": "return [{\n  json: {\n    error: true,\n    workflow: 'Credit Card Report Processor',\n    message: 'Gemini API did not return valid candidates. Check your GEMINI_API_KEY environment variable and the input file.',\n    timestamp: new Date().toISOString()\n  }\n}];"
+        "jsCode": "return [{\n  json: {\n    error: true,\n    workflow: 'Credit Card Report Processor',\n    message: 'Gemini document analysis did not return valid transaction data. The response could not be parsed as a JSON array of transactions. Check the input file format and Gemini API credentials.',\n    raw_response: $input.first().json.raw || 'N/A',\n    timestamp: new Date().toISOString()\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [880, 140],
+      "position": [944, 112],
       "id": "cc-error-handler",
       "name": "Error - No Gemini Response"
     }
   ],
   "connections": {
-    "Manual Trigger": {
+    "Google Drive Trigger": {
       "main": [
         [
           {
-            "node": "Read Credit Card PDF",
+            "node": "Download file",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Read Credit Card PDF": {
+    "Download file": {
       "main": [
         [
           {
-            "node": "Gemini Flash - Extract Transactions",
+            "node": "Analyze document",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Gemini Flash - Extract Transactions": {
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
       "main": [
         [
           {
